@@ -1,0 +1,18 @@
+import requests
+import xml.etree.ElementTree as ET
+import csv
+import time
+import random
+from datetime import datetime
+from typing import List, Dict, Optional
+import os
+import sys
+
+# Fuentes RSS
+RSS_FEEDS = {
+    'BBC Health': 'https://feeds.bbci.co.uk/news/health/rss.xml',
+    'WHO News': 'https://www.who.int/rss-feeds/news-english.xml',
+}
+
+# Archivo de salida
+OUTPUT_CSV = 'noticias_salud.csv
