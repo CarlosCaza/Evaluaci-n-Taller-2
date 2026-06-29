@@ -73,3 +73,68 @@ def get_content(url):
         return content[:1000]
     except:
         return ''
+
+def fetch_rss(url, source):
+    print(f"\nExtrayendo {source}: {url}")
+    try:
+        resp = requests.get(url, headers={'User-Agent': USER_AGENT}, timeout=15)
+        root = ET.fromstring(resp.content)
+        items = root.findall('.//item') or root.findall('.//entry')
+
+        articles = []
+        for item in items[:8]:
+            title = clean(item.find('title').text if item.find('title') is not None else '')
+            link = (item.find('link').text or '') if item.find('link') is not None else ''
+            date = get_date(item.find('pubDate').text if item.find('pubDate') is not None else '')
+
+            content = get_content(link)
+            analysis = analyze(title, content)
+
+            articles.append({
+                'fuente': source,
+                'titulo': title,
+                'fecha': date,
+                'enlace': link,
+                'resumen': content[:300] + '...' if len(content) > 300 else content,
+                **analysis
+            })
+
+        print(f"   Extraidos {len(articles)} articulos")
+        return articles
+    except Exception as e:
+        print(f"   Error: {e}")
+        return []
+
+def main():
+    print("SISTEMA DE ANALISIS DE DESINFORMACION SOBRE VACUNAS")
+    print("WHO News vs BBC News")
+
+    all_articles = []
+    for name, url in RSS_FEEDS.items():
+        all_articles.extend(fetch_rss(url, name))
+
+    if not all_articles:
+        print("\nNo se extrajeron articulos.")
+        return
+
+    fieldnames = ['fuente', 'titulo', 'fecha', 'enlace', 'resumen',
+                  'autismo', 'microchip', 'conspiracion', 'evidencia', 'advertencia', 'score']
+
+    with open(OUTPUT_CSV, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(all_articles)
+
+    print(f"\nDatos guardados en: {OUTPUT_CSV}")
+    print(f"Total: {len(all_articles)} articulos")
+
+    print("RESUMEN POR FUENTE")
+    
+    for source in set(a['fuente'] for a in all_articles):
+        sub = [a for a in all_articles if a['fuente'] == source]
+        avg_score = sum(a['score'] for a in sub) / len(sub)
+        print(f"\n{source}:")
+        print(f"   Articulos: {len(sub)}")
+        print(f"   Score desinformacion: {avg_score:.1f}/10")
+        print(f"   Evidencia cientifica: {sum(1 for a in sub if a['evidencia'] == 'Si')}/{len(sub)}")
+        print(f"   Advertencias: {sum(1 for a in sub if a['advertencia'] == 'Si')}/{len(sub)}")
