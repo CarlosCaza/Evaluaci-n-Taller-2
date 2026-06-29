@@ -1,68 +1,13 @@
 import requests
 import xml.etree.ElementTree as ET
+from bs4 import BeautifulSoup
 import csv
 import time
-import random
+import re
 from datetime import datetime
-from typing import List, Dict, Optional
-import os
-import sys
 
-# Fuentes RSS
 RSS_FEEDS = {
-    'BBC Health': 'https://feeds.bbci.co.uk/news/health/rss.xml',
     'WHO News': 'https://www.who.int/rss-feeds/news-english.xml',
+    'BBC News': 'http://feeds.bbci.co.uk/news/health/rss.xml'
 }
 
-# Archivo de salida
-OUTPUT_CSV = 'noticias_salud.csv'
-
-# Lista de User-Agents para rotación
-USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
-]
-
-# Funciones auxiliares
-def get_random_user_agent() -> str:
-    """Devuelve un User-Agent aleatorio de la lista."""
-    return random.choice(USER_AGENTS)
-
-def get_headers() -> Dict[str, str]:
-    """Construye headers con User-Agent rotativo."""
-    return {
-        'User-Agent': get_random_user_agent(),
-        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-        'Connection': 'keep-alive',
-    }
-
-def check_robots_txt(source_name: str, base_url: str) -> bool:
-    """
-    Verifica si robots.txt permite el scraping de la fuente.
-    Esta es una implementación simplificada. En un entorno real,
-    se usaría la librería 'robotparser' de Python.
-    """
-    try:
-        robots_url = f"{base_url}/robots.txt"
-        print(f"  Verificando robots.txt: {robots_url}")
-        response = requests.get(robots_url, headers=get_headers(), timeout=5)
-        if response.status_code == 200:
-            content = response.text.lower()
-            # Verificar si hay reglas que bloqueen /rss o /news
-            if 'disallow: /rss' in content or 'disallow: /news' in content:
-                print(f"  ⚠️  robots.txt de {source_name} parece restringir el acceso.")
-                return False
-            else:
-                print(f"  ✅ robots.txt de {source_name} es permisivo.")
-                return True
-        else:
-            # Si no hay robots.txt, asumimos permisivo (por defecto)
-            print(f"  ℹ️  No se encontró robots.txt en {source_name}. Se asume permisivo.")
-            return True
-    except Exception as e:
-        print(f"  ⚠️  Error al verificar robots.txt de {source_name}: {e}")
-        print(f"  ℹ️  Se continúa con la extracción (asumiendo permisivo).")
-        return True
