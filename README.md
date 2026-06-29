@@ -1,5 +1,5 @@
 Carlos Enrique Caza Cancho,    CarlosCaza
-Cesar Jair Huarac Vega,    
+Cesar Jair Huarac Vega,    notmecj0
 Francesco Morote Barboza,    francescomorote-source
 Adrián Fabrizio Zuazo Farje,    Azloup
 
@@ -13,7 +13,7 @@ El sistema está diseñado para ejecutarse **por lotes (Batch)**.
 La ejecución del script de extracción está planificada para realizarse **cada 24 horas (diariamente)**. Esto nos permite capturar las nuevas noticias del día y los posts más relevantes (top daily posts) de la comunidad sin sobrecargar las fuentes.
 
 **3. ¿Cómo se almacenarán los datos extraídos?**
-Los datos se almacenan en un archivo plano estructurado de formato **CSV** (`datos_maestros_keto.csv`). 
+Los datos se almacenan en un archivo plano estructurado de formato **CSV** (`vacunas_analisis.csv`). 
 *Justificación:* Dado que el volumen objetivo es de decenas o centenas de registros, una base de datos relacional (como SQL) añadiría complejidad innecesaria. El formato CSV es ligero, nativamente compatible con la librería `pandas` utilizada en la Fase 3, y permite que la aplicación de Streamlit (Fase 4) lea la información en milisegundos para renderizar el dashboard.
 
 **4. ¿Cómo se integrarán los datos extraídos de las fuentes?**
@@ -32,15 +32,15 @@ El flujo de integración ocurre en el script principal de Python. Los datos crud
 
 ```mermaid
 graph TD
-    A([Inicio: Ejecución de main]) --> B{Término de Búsqueda: 'Keto'}
+    A([Inicio: Ejecución de main]) --> B{Término de Búsqueda: 'vacunas'}
 
     %% Fase de Extracción
     subgraph Fase 1: Extracción de Datos
-        B --> C[Scraper BBC News]
-        B --> D[API Reddit PRAW]
+        B --> C[Scraper WHO News]
+        B --> D[Scraper BBC News]
         
-        C -->|requests + BeautifulSoup| E[(Datos Crudos BBC)]
-        D -->|Autenticación y Búsqueda| F[(Datos Crudos Reddit)]
+        C -->|requests + BeautifulSoup| E[(Datos Crudos WHO)]
+        D -->|Autenticación y Búsqueda| F[(Datos Crudos BBC)]
     end
 
     %% Fase de Transformación
@@ -54,7 +54,7 @@ graph TD
 
     %% Fase de Carga
     subgraph Fase 3: Almacenamiento
-        J --> K[(CSV: datos_maestros_keto.csv)]
+        J --> K[(CSV: vacunas_analisis.csv)]
     end
 
     %% Fase de Interfaz
