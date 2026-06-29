@@ -3,9 +3,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime
 
-# ==========================================
-# 1. CLASE BASE (Plantilla)
-# ==========================================
+
 class ScraperBase:
     def __init__(self, fuente_nombre):
         self.fuente_nombre = fuente_nombre
@@ -14,14 +12,10 @@ class ScraperBase:
     def extraer(self):
         pass
 
-# ==========================================
-# 2. CLASE: BBC HEALTH (La fuente rigurosa)
-# ==========================================
 class ScraperBBC(ScraperBase):
     def __init__(self, lista_urls):
         super().__init__(fuente_nombre="BBC")
         self.lista_urls = lista_urls
-        # Disfraz de navegador para evitar cualquier bloqueo preventivo
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
@@ -54,9 +48,7 @@ class ScraperBBC(ScraperBase):
         except Exception as e:
             print(f"Error en BBC: {e}")
 
-# ==========================================
-# 3. CLASE: BLOGS KETO (El contraste)
-# ==========================================
+
 class ScraperBlogs(ScraperBase):
     def __init__(self, lista_urls):
         super().__init__(fuente_nombre="Keto Blogs")
@@ -94,12 +86,9 @@ class ScraperBlogs(ScraperBase):
         except Exception as e:
             print(f"Error en Blogs: {e}")
 
-# ==========================================
-# 4. EJECUCIÓN E INTEGRACIÓN FINAL
-# ==========================================
+
 if __name__ == "__main__":
     
-    # --- 1. PROCESAR BBC ---
     urls_bbc = ["https://www.bbc.co.uk/food/articles/keto_diet_weight_loss"]
     bot_bbc = ScraperBBC(lista_urls=urls_bbc)
     bot_bbc.extraer()
@@ -109,8 +98,6 @@ if __name__ == "__main__":
         df_bbc.to_csv("datos_bbc.csv", index=False, encoding='utf-8')
         print("-> Archivo individual guardado: 'datos_bbc.csv'")
 
-    # --- 2. PROCESAR BLOGS KETO ---
-    # Aquí están los links que encontraste
     urls_blogs = [
         "https://perfectketo.com/keto-success-stories/",
         "https://beketo.uk/keto-questions-faq/"
@@ -123,11 +110,12 @@ if __name__ == "__main__":
         df_blogs.to_csv("datos_blogs.csv", index=False, encoding='utf-8')
         print("-> Archivo individual guardado: 'datos_blogs.csv'")
 
-    # --- 3. INTEGRACIÓN MAESTRA ---
     print("\n--- Integrando bases de datos ---")
     if not df_bbc.empty and not df_blogs.empty:
         df_consolidado = pd.concat([df_bbc, df_blogs], ignore_index=True)
-        df_consolidado.to_csv("datos_maestros_keto.csv", index=False, encoding='utf-8')
+        df_consolidado.to_csv("datos_dieta.csv", index=False, encoding='utf-8')
         print(f"¡Éxito total! Se integraron {len(df_consolidado)} registros en 'datos_maestros_keto.csv'.")
     else:
         print("Faltan datos de alguna fuente para hacer la integración completa.")
+
+
