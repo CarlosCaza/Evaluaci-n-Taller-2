@@ -27,3 +27,33 @@ def get_date(text):
             return datetime.strptime(text.replace('Z', '+00:00'), '%Y-%m-%dT%H:%M:%S%z').strftime('%Y-%m-%d')
         except:
             return text
+
+def analyze(title, content):
+    combined = (title + ' ' + content).lower()
+
+    desinfo = {
+        'autismo': 'autism' in combined or 'autista' in combined,
+        'microchip': 'microchip' in combined or 'chip' in combined,
+        'conspiracion': 'conspiracy' in combined or 'conspiración' in combined
+    }
+
+    confiable = {
+        'evidencia': any(w in combined for w in ['study', 'research', 'evidence', 'ensayo', 'clinical']),
+        'advertencia': any(w in combined for w in ['side effect', 'risk', 'advertencia', 'efecto secundario'])
+    }
+
+    score = sum([3 if desinfo['autismo'] else 0,
+                 3 if desinfo['microchip'] else 0,
+                 2 if desinfo['conspiracion'] else 0])
+    score -= sum([1 if confiable['evidencia'] else 0,
+                  1 if confiable['advertencia'] else 0])
+    score = max(0, min(10, score))
+
+    return {
+        'autismo': 'Si' if desinfo['autismo'] else 'No',
+        'microchip': 'Si' if desinfo['microchip'] else 'No',
+        'conspiracion': 'Si' if desinfo['conspiracion'] else 'No',
+        'evidencia': 'Si' if confiable['evidencia'] else 'No',
+        'advertencia': 'Si' if confiable['advertencia'] else 'No',
+        'score': score
+    }
