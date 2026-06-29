@@ -6,15 +6,14 @@ import time
 import re
 from datetime import datetime
 
+RSS_FEEDS = {
+    'WHO News': 'https://www.who.int/rss-feeds/news-english.xml',
+    'BBC News': 'http://feeds.bbci.co.uk/news/health/rss.xml'
+}
 
 OUTPUT_CSV = 'vacunas_analisis.csv'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
 
 def clean(text):
     return re.sub(r'\s+', ' ', text).strip() if text else ''
-
-RSS_FEEDS = {
-    'WHO News': 'https://www.who.int/rss-feeds/news-english.xml',
-    'BBC News': 'http://feeds.bbci.co.uk/news/health/rss.xml'
-}
 
