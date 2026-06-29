@@ -57,3 +57,19 @@ def analyze(title, content):
         'advertencia': 'Si' if confiable['advertencia'] else 'No',
         'score': score
     }
+
+def get_content(url):
+    if not url:
+        return ''
+    time.sleep(1)
+    try:
+        resp = requests.get(url, headers={'User-Agent': USER_AGENT}, timeout=15)
+        soup = BeautifulSoup(resp.content, 'html.parser')
+        body = soup.find('article') or soup.find('main') or soup.find('div', class_=re.compile('content|body|story'))
+        if not body:
+            body = soup
+        paragraphs = body.find_all('p')
+        content = ' '.join([clean(p.text) for p in paragraphs if len(p.text) > 30])
+        return content[:1000]
+    except:
+        return ''
